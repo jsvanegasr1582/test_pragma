@@ -12,7 +12,7 @@ import pandas as pd
 
 def _config() -> dict[str, str]:
     """Lee y valida la configuración PostgreSQL del archivo .env."""
-    env_file = Path(__file__).resolve().parent / ".env"
+    env_file = Path(__file__).resolve().parent.parent / ".env"
     if not env_file.is_file():
         raise FileNotFoundError(f"No se encontró {env_file}")
 
@@ -65,7 +65,7 @@ def _quote(name: str) -> str:
     return '"' + name.replace('"', '""') + '"'
 
 
-def load_dataframe_to_postgres(table_name: str, dataframe: pd.DataFrame) -> int:
+def write_to_postgres(table_name: str, dataframe: pd.DataFrame) -> int:
     """Carga las filas del DataFrame en una tabla PostgreSQL existente."""
     config = _config()
     if dataframe.empty:
@@ -99,8 +99,13 @@ def load_dataframe_to_postgres(table_name: str, dataframe: pd.DataFrame) -> int:
     return len(dataframe)
 
 
-def fetch_table_from_postgres(query: str) -> pd.DataFrame:
-    """Ejecuta una consulta SQL y devuelve su resultado como DataFrame."""
+def read_from_postgres(query: str | Path) -> pd.DataFrame:
+    """Ejecuta una consulta SQL o el archivo .sql indicado y devuelve un DataFrame."""
+    if isinstance(query, Path):
+        query = query.read_text(encoding="utf-8")
+    elif Path(query).suffix.lower() == ".sql":
+        query = Path(query).read_text(encoding="utf-8")
+
     query = query.strip().removesuffix(";")
     if not query:
         raise ValueError("query no puede estar vacía.")

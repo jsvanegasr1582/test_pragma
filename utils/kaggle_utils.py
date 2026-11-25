@@ -12,8 +12,8 @@ def import_data(file_path):
     KaggleDatasetAdapter.PANDAS,
     "datasnaek/youtube-new",
     file_path,
-    # Provide any additional arguments like
-    # sql_query or pandas_kwargs. See the
+    # Provide any additional arguments like 
+    # sql_query or pandas_kwargs. See the 
     # documenation for more information:
     # https://github.com/Kaggle/kagglehub/blob/main/README.md#kaggledatasetadapterpandas
   )
