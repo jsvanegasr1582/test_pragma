@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "youtube-trends-analysis"
+version = "0.1.0"
+description = "Análisis exploratorio de videos en tendencia de YouTube"
+requires-python = ">=3.10"
+dependencies = [
+    "ipykernel",
+    "ipython",
+    "kagglehub[pandas-datasets]",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "scipy",
+    "scikit-learn",
+]
+
+[tool.setuptools.packages.find]
+include = ["utils*"]
