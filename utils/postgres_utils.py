@@ -65,6 +65,18 @@ def _quote(name: str) -> str:
     return '"' + name.replace('"', '""') + '"'
 
 
+def _load_query(query: str | Path) -> str:
+    if isinstance(query, Path):
+        query = query.read_text(encoding="utf-8")
+    elif Path(query).suffix.lower() == ".sql":
+        query = Path(query).read_text(encoding="utf-8")
+
+    query = query.strip().removesuffix(";")
+    if not query:
+        raise ValueError("query no puede estar vacía.")
+    return query
+
+
 def write_to_postgres(table_name: str, dataframe: pd.DataFrame) -> int:
     """Carga las filas del DataFrame en una tabla PostgreSQL existente."""
     config = _config()
@@ -101,14 +113,7 @@ def write_to_postgres(table_name: str, dataframe: pd.DataFrame) -> int:
 
 def read_from_postgres(query: str | Path) -> pd.DataFrame:
     """Ejecuta una consulta SQL o el archivo .sql indicado y devuelve un DataFrame."""
-    if isinstance(query, Path):
-        query = query.read_text(encoding="utf-8")
-    elif Path(query).suffix.lower() == ".sql":
-        query = Path(query).read_text(encoding="utf-8")
-
-    query = query.strip().removesuffix(";")
-    if not query:
-        raise ValueError("query no puede estar vacía.")
+    query = _load_query(query)
 
     config = _config()
     csv_data = _psql(
@@ -118,3 +123,10 @@ def read_from_postgres(query: str | Path) -> pd.DataFrame:
         f"COPY ({query}) TO STDOUT WITH (FORMAT CSV, HEADER TRUE)",
     )
     return pd.read_csv(StringIO(csv_data))
+
+
+def execute_query(query: str | Path) -> None:
+    """Ejecuta una consulta SQL o un archivo .sql sin devolver resultados."""
+    query = _load_query(query)
+    config = _config()
+    _psql(config, "-q", "-c", query)
